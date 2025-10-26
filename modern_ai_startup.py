@@ -2197,18 +2197,53 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         collaboration_system.disconnect(websocket)
 
+# Store collaboration sessions
+collaboration_sessions = {}
+
 @app.post("/start-collaboration")
 async def start_collaboration(task_data: dict):
     task = task_data.get("task", "")
     if not task:
         return {"error": "Task is required"}
     
-    # Start collaboration in background
+    # Create a new collaboration session
+    import uuid
+    session_id = str(uuid.uuid4())
+    
+    # Store minimal data for Vercel
+    collaboration_sessions[session_id] = {
+        "task": task,
+        "log": [],
+        "agent_states": {agent_id: {"status": "idle", "progress": 0, "thought": ""} 
+                         for agent_id in AGENT_PERSONALITIES.keys()},
+        "completed": False
+    }
+    
+    return {"status": "collaboration_started", "task": task, "session_id": session_id}
+
+@app.get("/get-collaboration-status/{session_id}")
+async def get_collaboration_status(session_id: str):
+    """Get current collaboration status for polling"""
     try:
-        asyncio.create_task(collaboration_system.simulate_agent_collaboration(task))
-        return {"status": "collaboration_started", "task": task}
+        if session_id not in collaboration_sessions:
+            return {"status": "not_found"}
+        
+        session = collaboration_sessions[session_id]
+        
+        # Simulate progress if not completed yet
+        if not session["completed"]:
+            # Add a log entry if none exist
+            if not session["log"]:
+                session["log"].append({
+                    "agent": "System",
+                    "role": "Orchestrator",
+                    "thought": f"Starting analysis of: {session['task']}",
+                    "timestamp": datetime.now().isoformat()
+                })
+        
+        return session
     except Exception as e:
-        logger.error(f"Error starting collaboration: {e}")
+        logger.error(f"Error getting collaboration status: {e}")
         return {"status": "error", "error": str(e)}
 
 @app.exception_handler(Exception)
