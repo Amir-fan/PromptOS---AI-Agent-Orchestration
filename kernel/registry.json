@@ -1,0 +1,61 @@
+{
+  "agents": {
+    "planner": {
+      "name": "Planner Agent",
+      "description": "Breaks down complex tasks into subtasks",
+      "capabilities": ["task_decomposition", "priority_assignment"],
+      "input_format": "natural_language",
+      "output_format": "structured_subtasks",
+      "max_concurrent_tasks": 1
+    },
+    "executor": {
+      "name": "Executor Agent",
+      "description": "Executes concrete tasks and operations",
+      "capabilities": ["web_search", "text_processing", "data_analysis", "file_operations"],
+      "input_format": "structured_task",
+      "output_format": "task_result",
+      "max_concurrent_tasks": 5
+    },
+    "critic": {
+      "name": "Critic Agent",
+      "description": "Evaluates quality and coherence of outputs",
+      "capabilities": ["quality_assessment", "coherence_check", "improvement_suggestions"],
+      "input_format": "agent_outputs",
+      "output_format": "evaluation_report",
+      "max_concurrent_tasks": 3
+    },
+    "reporter": {
+      "name": "Reporter Agent",
+      "description": "Compiles reasoning traces and final reports",
+      "capabilities": ["trace_compilation", "report_generation", "transparency_logging"],
+      "input_format": "all_agent_outputs",
+      "output_format": "final_report",
+      "max_concurrent_tasks": 2
+    },
+    "ethics": {
+      "name": "Ethics Agent",
+      "description": "Checks for safety, bias, and ethical concerns",
+      "capabilities": ["safety_check", "bias_detection", "privacy_validation"],
+      "input_format": "final_output",
+      "output_format": "ethics_assessment",
+      "max_concurrent_tasks": 2
+    }
+  },
+  "routing_rules": {
+    "task_decomposition": "planner",
+    "web_search": "executor",
+    "text_processing": "executor",
+    "data_analysis": "executor",
+    "file_operations": "executor",
+    "quality_evaluation": "critic",
+    "safety_check": "ethics",
+    "bias_detection": "ethics",
+    "report_generation": "reporter"
+  },
+  "system_config": {
+    "max_task_depth": 5,
+    "timeout_seconds": 300,
+    "retry_attempts": 3,
+    "memory_cleanup_interval": 3600
+  }
+}
