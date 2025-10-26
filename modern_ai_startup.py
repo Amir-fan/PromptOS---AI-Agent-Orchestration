@@ -26,6 +26,10 @@ load_dotenv()
 
 # Configure OpenAI
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+# Check if API key is set
+if not openai.api_key:
+    logger.warning("OPENAI_API_KEY not set")
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
@@ -34,12 +38,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Ensure we're in the project directory
-project_dir = Path(__file__).parent
-os.chdir(project_dir)
-
-# Create data directory
-data_dir = project_dir / "data"
-data_dir.mkdir(exist_ok=True)
+try:
+    project_dir = Path(__file__).parent
+    os.chdir(project_dir)
+    
+    # Create data directory
+    data_dir = project_dir / "data"
+    data_dir.mkdir(exist_ok=True)
+except Exception as e:
+    logger.warning(f"Could not set up directories: {e}")
+    project_dir = Path("/tmp")
 
 # AI Agent Personalities
 AGENT_PERSONALITIES = {
@@ -328,6 +336,11 @@ class AgentCollaborationSystem:
 # Real AI Agent Functions
 def call_openai_agent(agent_name: str, role: str, task: str, context: str = "") -> str:
     """Call OpenAI API for real agent reasoning."""
+    # If no API key, return a placeholder response
+    if not openai.api_key or openai.api_key.strip() == "":
+        logger.warning("OPENAI_API_KEY not configured, using placeholder response")
+        return f"As {agent_name}, I'm analyzing the task: {task[:50]}..."
+    
     try:
         system_prompt = f"""You are {agent_name}, a {role}. 
 
@@ -345,7 +358,8 @@ Provide a BRIEF, concise response (1-2 sentences max) that shows what you're wor
                 {"role": "user", "content": f"Please analyze and respond to: {task}"}
             ],
             max_tokens=100,
-            temperature=0.7
+            temperature=0.7,
+            timeout=10
         )
         
         response_text = response.choices[0].message.content.strip()
@@ -357,7 +371,7 @@ Provide a BRIEF, concise response (1-2 sentences max) that shows what you're wor
         return response_text
     except Exception as e:
         logging.error(f"OpenAI API error for {agent_name}: {e}")
-        return f"I'm having trouble processing this request right now. Error: {str(e)}"
+        return f"Analyzing {task[:50]}... (API temporarily unavailable)"
 
 def get_agent_expertise(agent_name: str) -> str:
     """Get agent expertise based on name."""
@@ -2190,9 +2204,17 @@ async def start_collaboration(task_data: dict):
         return {"error": "Task is required"}
     
     # Start collaboration in background
-    asyncio.create_task(collaboration_system.simulate_agent_collaboration(task))
-    
-    return {"status": "collaboration_started", "task": task}
+    try:
+        asyncio.create_task(collaboration_system.simulate_agent_collaboration(task))
+        return {"status": "collaboration_started", "task": task}
+    except Exception as e:
+        logger.error(f"Error starting collaboration: {e}")
+        return {"status": "error", "error": str(e)}
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+    return {"error": "Internal server error", "message": str(exc)}
 
 if __name__ == "__main__":
     print("🚀 Starting PromptOS Modern AI Startup...")
