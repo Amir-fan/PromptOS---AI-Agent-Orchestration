@@ -1783,25 +1783,25 @@ async def dashboard():
             // Simulate agent collaboration for Vercel
             function simulateAgentCollaboration(task) {
                 const agents = [
-                    {name: 'Alex Chen', role: 'Strategic Architect', avatar: '🧠', phases: [
+                    {id: 'planner', name: 'Alex Chen', role: 'Strategic Architect', avatar: '🧠', phases: [
                         'Analyzing task structure and requirements...',
                         'Developing strategic framework...',
                         'Finalizing execution plan...'
                     ]},
-                    {name: 'Sam Rodriguez', role: 'Execution Specialist', avatar: '⚡', phases: [
+                    {id: 'executor', name: 'Sam Rodriguez', role: 'Execution Specialist', avatar: '⚡', phases: [
                         'Executing core analysis...',
                         'Processing data and synthesizing findings...',
                         'Completing technical execution...'
                     ]},
-                    {name: 'Casey Kim', role: 'Quality Assurance', avatar: '🔍', phases: [
+                    {id: 'critic', name: 'Casey Kim', role: 'Quality Assurance', avatar: '🔍', phases: [
                         'Reviewing and validating quality...',
                         'Identifying improvements and ensuring accuracy...'
                     ]},
-                    {name: 'Eva Patel', role: 'Ethics Officer', avatar: '⚖️', phases: [
+                    {id: 'ethics', name: 'Eva Patel', role: 'Ethics Officer', avatar: '⚖️', phases: [
                         'Conducting ethical assessment...',
                         'Validating ethical compliance...'
                     ]},
-                    {name: 'Riley Thompson', role: 'Communication Lead', avatar: '📊', phases: [
+                    {id: 'reporter', name: 'Riley Thompson', role: 'Communication Lead', avatar: '📊', phases: [
                         'Compiling final report...',
                         'Creating executive summary...',
                         'Finalizing comprehensive analysis...'
@@ -1815,7 +1815,7 @@ async def dashboard():
                     agent.phases.forEach(phase => {
                         setTimeout(() => {
                             updateAgent({
-                                agent_id: agent.name.toLowerCase().split(' ')[0] + (agent.name.toLowerCase().split(' ')[1] || ''),
+                                agent_id: agent.id,
                                 agent_name: agent.name,
                                 role: agent.role,
                                 status: 'working',
