@@ -1780,6 +1780,74 @@ async def dashboard():
                 }, speed);
             }
             
+            // Simulate agent collaboration for Vercel
+            function simulateAgentCollaboration(task) {
+                const agents = [
+                    {name: 'Alex Chen', role: 'Strategic Architect', avatar: '🧠', phases: [
+                        'Analyzing task structure and requirements...',
+                        'Developing strategic framework...',
+                        'Finalizing execution plan...'
+                    ]},
+                    {name: 'Sam Rodriguez', role: 'Execution Specialist', avatar: '⚡', phases: [
+                        'Executing core analysis...',
+                        'Processing data and synthesizing findings...',
+                        'Completing technical execution...'
+                    ]},
+                    {name: 'Casey Kim', role: 'Quality Assurance', avatar: '🔍', phases: [
+                        'Reviewing and validating quality...',
+                        'Identifying improvements and ensuring accuracy...'
+                    ]},
+                    {name: 'Eva Patel', role: 'Ethics Officer', avatar: '⚖️', phases: [
+                        'Conducting ethical assessment...',
+                        'Validating ethical compliance...'
+                    ]},
+                    {name: 'Riley Thompson', role: 'Communication Lead', avatar: '📊', phases: [
+                        'Compiling final report...',
+                        'Creating executive summary...',
+                        'Finalizing comprehensive analysis...'
+                    ]}
+                ];
+                
+                let delay = 500;
+                let totalPhases = 0;
+                
+                agents.forEach(agent => {
+                    agent.phases.forEach(phase => {
+                        setTimeout(() => {
+                            updateAgent({
+                                agent_id: agent.name.toLowerCase().split(' ')[0] + (agent.name.toLowerCase().split(' ')[1] || ''),
+                                agent_name: agent.name,
+                                role: agent.role,
+                                status: 'working',
+                                progress: Math.min(0.9, (totalPhases + 1) / 14),
+                                thought: phase,
+                                avatar: agent.avatar,
+                                timestamp: new Date().toISOString()
+                            });
+                            addToCollaborationLog({
+                                agent_name: agent.name,
+                                role: agent.role,
+                                thought: phase,
+                                avatar: agent.avatar,
+                                timestamp: new Date().toISOString()
+                            });
+                            totalPhases++;
+                            
+                            if (totalPhases === 13) {
+                                setTimeout(() => {
+                                    handleCollaborationComplete({
+                                        total_phases: 13,
+                                        agents_involved: agents.map(a => a.name),
+                                        timestamp: new Date().toISOString()
+                                    });
+                                }, 1000);
+                            }
+                        }, delay);
+                        delay += 800;
+                    });
+                });
+            }
+            
             // Update knowledge graph
             function updateKnowledgeGraph(graph) {
                 const graphDiv = document.getElementById('knowledgeGraph');
@@ -2154,19 +2222,8 @@ async def dashboard():
                     
                     const data = await response.json();
                     
-                    // Show message that it's working
-                    addToCollaborationLog({
-                        agent_name: 'System',
-                        role: 'Orchestrator',
-                        thought: 'AI agents are processing your request...',
-                        avatar: '🤖',
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    // WebSocket won't work on Vercel, so just show completion after delay
-                    setTimeout(() => {
-                        handleCollaborationComplete({total_phases: 12, agents_involved: ['all']});
-                    }, 3000);
+                    // Simulate all 5 agents working since WebSocket doesn't work on Vercel
+                    simulateAgentCollaboration(task);
                     
                 } catch (error) {
                     console.error('Error starting collaboration:', error);
