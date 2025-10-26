@@ -195,4 +195,4 @@ Built with:
 
 ---
 
-**Made with ❤️ by the PromptOS Team**
+**Made with ❤️ by Amir**
